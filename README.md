@@ -1,3 +1,35 @@
+# TodoList Project
+
+## Overview
+This TodoList project is a simple yet powerful tool to manage your daily tasks. It's built using React and TypeScript, showcasing the use of functional components, hooks, and state management. The project allows users to add, delete, and mark tasks as complete. It also features a search functionality to filter through tasks.
+
+## Features
+- **Add Tasks:** Users can add new tasks to their list.
+- **Delete Tasks:** Users can remove tasks they no longer need.
+- **Mark Tasks as Complete:** Users can check off tasks they have finished.
+- **Search Functionality:** Users can filter tasks based on text input, making it easier to find specific tasks.
+
+## Technologies Used
+- **React:** A JavaScript library for building user interfaces.
+- **TypeScript:** A typed superset of JavaScript that compiles to plain JavaScript.
+- **CSS:** For styling the components.
+
+## Project Structure
+- `App.tsx`: The main component that renders the TodoList.
+- `TodoList.tsx`: Contains the TodoList component along with Task, TaskList, AddButton, DeleteButton, SearchBar, and TaskGenerator components.
+- `App.css`: Styles for the App component.
+- `TodoList.css`: Styles for the TodoList and its child components.
+
+## Getting Started
+To get started with this project, clone the repository and install the dependencies:
+
+```bash
+git clone <repository-url>
+cd todolist-project
+npm install
+```
+
+--------------
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
