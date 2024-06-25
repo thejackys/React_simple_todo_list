@@ -43,24 +43,29 @@ function SearchBar({filterText, onfilterChange}:
   )
 }
 
-function Task({task}: {task: Task}) {
+function Task({task, onDeletebuttonClick, onTaskCompletionChange}:
+    {task: Task, onDeletebuttonClick: () => void, onTaskCompletionChange: () => void}
+) {
   return (
     <div className='item'>
     <tr>
-        <td><input type="checkbox" checked={task.isComplete} /></td>
+        <td><input type="checkbox"  checked={task.isComplete} onChange={onTaskCompletionChange} /></td>
         <td><span className='task-text'>{task.text}</span></td>
-        <td style={{textAlign: 'right'}}><DeleteButton /></td>
+        <td style={{textAlign: 'right'}}><DeleteButton onDeletebuttonClick={onDeletebuttonClick}/></td>
     </tr>
       
     </div>
   )
 }
 
-function TaskList({taskList}: {taskList: TaskList}) {
+function TaskList({taskList, onDeletebuttonClick, onTaskCompletionChange}: 
+    {taskList: TaskList, onDeletebuttonClick: (id :number) => void, onTaskCompletionChange: (id:number) => void}) {
   return (
     <div className='list'>
       {taskList.tasks.map(task => (
-        <Task key={task.id} task={task} />
+        <Task key={task.id} task={task} 
+        onDeletebuttonClick={() => onDeletebuttonClick(task.id)}
+        onTaskCompletionChange={() => onTaskCompletionChange(task.id)}/>
       ))}
     </div>
   )
@@ -81,10 +86,12 @@ function TaskGenerator({newTaskText, onNewTaskTextChange, onAddTask}:
 
 
 export function TodoList(){
+    
     const [taskList, setTaskList] = useState(retrievedTaskList)
     const [filterText, setFilterText] = useState('')
     const [newTaskText, setNewTaskText] = useState('')
 
+    
     const filteredTaskList = {
         tasks: taskList.tasks.filter(task => task.text.includes(filterText))
     } //filtered text only change when filterText changes
@@ -100,9 +107,22 @@ export function TodoList(){
         }
         setTaskList(newTaskList)
     }
-    function deleteTask(id: number) {
+    function handleDeleteTask(id: number) {
         const newTaskList = {
             tasks: taskList.tasks.filter(task => task.id !== id)
+        }
+        setTaskList(newTaskList)
+    }
+    function handleTaskCompletionChange(id: number) {
+        //Should I seperate complete state from taskList?
+        //What would be the overhead?
+        const newTaskList = {
+            tasks: taskList.tasks.map(task => {
+                if (task.id === id) {
+                    return {...task, isComplete: !task.isComplete}
+                }
+                return task
+            })
         }
         setTaskList(newTaskList)
     }
@@ -123,7 +143,9 @@ export function TodoList(){
         <div>
         <SearchBar filterText={filterText} onfilterChange={setFilterText}/>
         <TaskGenerator newTaskText={newTaskText} onNewTaskTextChange={setNewTaskText} onAddTask={handleAddNewTask}/>
-        <TaskList taskList={filteredTaskList} />
+        <TaskList taskList={filteredTaskList} 
+        onDeletebuttonClick={handleDeleteTask}
+        onTaskCompletionChange={handleTaskCompletionChange}/>
         </div>
     )
 }
