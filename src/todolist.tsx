@@ -7,16 +7,8 @@ interface Task {
   isComplete: boolean
 }
 
-interface TaskList {
+export interface TaskList {
   tasks: Task[]
-}
-let retrievedTaskList: TaskList = {
-  tasks: [
-    { id: 1, text: 'Learn React', isComplete: false },
-    { id: 2, text: 'Learn TypeScript', isComplete: false },
-    { id: 3, text: 'Build Something Awesome', isComplete: false },
-    { id: 4, text: 'Learn Vite', isComplete: false }
-  ]
 }
 
 function AddButton({onAddbuttonClick}: {onAddbuttonClick: () => void}){
@@ -85,20 +77,21 @@ function TaskGenerator({newTaskText, onNewTaskTextChange, onAddTask}:
 
 
 
-export function TodoList(){
+export function TodoList({retrievedTaskList}: {retrievedTaskList: TaskList}){
     
     const [taskList, setTaskList] = useState(retrievedTaskList)
     const [filterText, setFilterText] = useState('')
     const [newTaskText, setNewTaskText] = useState('')
+    const [totalTaskCount, setTotalTaskCount] = useState(retrievedTaskList.tasks.length)
 
-    
+
     const filteredTaskList = {
         tasks: taskList.tasks.filter(task => task.text.includes(filterText))
     } //filtered text only change when filterText changes
 
     function handleAddNewTask(taskText: string) {
         const newTask = {
-            id: taskList.tasks.length + 1,
+            id: totalTaskCount + 1,
             text: taskText,
             isComplete: false,
         }
@@ -106,6 +99,7 @@ export function TodoList(){
             tasks: [...taskList.tasks, newTask]
         }
         setTaskList(newTaskList)
+        setTotalTaskCount(totalTaskCount + 1)
     }
     function handleDeleteTask(id: number) {
         const newTaskList = {
