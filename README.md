@@ -1,7 +1,7 @@
 # TodoList Project
 
 ## Overview
-This TodoList project is a simple yet powerful tool to manage your daily tasks. It's built using React and TypeScript, showcasing the use of functional components, hooks, and state management. The project allows users to add, delete, and mark tasks as complete. It also features a search functionality to filter through tasks.
+This TodoList project is built using React and TypeScript, showcasing the use of functional components, hooks, and state management. The project allows users to add, delete, and mark tasks as complete. It also features a search functionality to filter through tasks.
 
 ## Features
 - **Add Tasks:** Users can add new tasks to their list.
