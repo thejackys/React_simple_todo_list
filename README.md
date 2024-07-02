@@ -28,6 +28,7 @@ To get started with this project, clone the repository and install the dependenc
 git clone <repository-url>
 cd todolist-project
 npm install
+npm run dev
 ```
 
 --------------
