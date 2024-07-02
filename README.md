@@ -1,4 +1,5 @@
 # TodoList Project
+<img src="./img/demo.png" alt="demo image" width="300"/>
 
 ## Overview
 This TodoList project is built using React and TypeScript, showcasing the use of functional components, hooks, and state management. The project allows users to add, delete, and mark tasks as complete. It also features a search functionality to filter through tasks.
