@@ -1,14 +1,13 @@
-import { useState } from 'react'
+import axios from 'axios'
+import { useState, useEffect } from 'react'
 import './todolist.css';
 
 interface Task {
-  id: number
-  text: string
-  isComplete: boolean
-}
-
-export interface TaskList {
-  tasks: Task[]
+  id: number;
+  title: string;
+  completed: boolean;
+  description: string;
+  created: string; // ISO 8601 format date string
 }
 
 function AddButton({onAddbuttonClick}: {onAddbuttonClick: () => void}){
@@ -41,8 +40,9 @@ function Task({task, onDeletebuttonClick, onTaskCompletionChange}:
   return (
     <div className='item'>
     <tr>
-        <td><input type="checkbox"  checked={task.isComplete} onChange={onTaskCompletionChange} /></td>
-        <td><span className='task-text'>{task.text}</span></td>
+        <td><input type="checkbox"  checked={task.completed} onChange={onTaskCompletionChange} /></td>
+        <td><span className='task-text'>{task.title ? task.title : ''}</span></td>
+        {/* <td><span className='task-text'>{task.description ? task.description : ''}</span></td> */}
         <td style={{textAlign: 'right'}}><DeleteButton onDeletebuttonClick={onDeletebuttonClick}/></td>
     </tr>
       
@@ -51,10 +51,10 @@ function Task({task, onDeletebuttonClick, onTaskCompletionChange}:
 }
 
 function TaskList({taskList, onDeletebuttonClick, onTaskCompletionChange}: 
-    {taskList: TaskList, onDeletebuttonClick: (id :number) => void, onTaskCompletionChange: (id:number) => void}) {
+    {taskList: Task[], onDeletebuttonClick: (id :number) => void, onTaskCompletionChange: (id:number) => void}) {
   return (
     <div className='list'>
-      {taskList.tasks.map(task => (
+      {taskList.map(task => (
         <Task key={task.id} task={task} 
         onDeletebuttonClick={() => onDeletebuttonClick(task.id)}
         onTaskCompletionChange={() => onTaskCompletionChange(task.id)}/>
@@ -77,62 +77,91 @@ function TaskGenerator({newTaskText, onNewTaskTextChange, onAddTask}:
 
 
 
-export function TodoList({retrievedTaskList}: {retrievedTaskList: TaskList}){
+
+export function TodoList(){
     
-    const [taskList, setTaskList] = useState(retrievedTaskList)
     const [filterText, setFilterText] = useState('')
     const [newTaskText, setNewTaskText] = useState('')
-    const [totalTaskCount, setTotalTaskCount] = useState(retrievedTaskList.tasks.length)
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const baseURL = "http://127.0.0.1:8000/api/todolist/";
+    // const [totalTaskCount, setTotalTaskCount] = useState(0)
+    // const totalTaskCount = taskList? Object.keys(taskList).length : 0
+    useEffect(() => {
+      const fetchTasks = async () => {
+        try {
+          const response = await axios.get(baseURL);
+          setTasks(response.data); // Assuming the API returns the array directly
+        } catch (error) {
+          console.error('Error fetching tasks:', error);
+        }
+      };
+  
+      fetchTasks();
+    }, []); // Empty dependency array means this effect runs once on mount
 
+    
+    const filteredTaskList = tasks.filter((task: Task) => task.description.toLowerCase().includes(filterText.toLowerCase()))
+    //filtered text only change when filterText changes
 
-    const filteredTaskList = {
-        tasks: taskList.tasks.filter(task => task.text.includes(filterText))
-    } //filtered text only change when filterText changes
-
+    
     function handleAddNewTask(taskText: string) {
         const newTask = {
-            id: totalTaskCount + 1,
-            text: taskText,
-            isComplete: false,
-        }
-        const newTaskList = {
-            tasks: [...taskList.tasks, newTask]
-        }
-        setTaskList(newTaskList)
-        setTotalTaskCount(totalTaskCount + 1)
+            title: taskText,
+        } as Task
+        
+        // add new task to tasklist
+        if (newTask.description === '') return;
+        const addTask = async (newTask: Task) => {
+          try {
+            const response = await axios.post(baseURL, newTask);
+            console.log(response.data)
+            const addedTask = response.data;
+            const newTasks = tasks? [...tasks, addedTask] : [addedTask]
+            setTasks(newTasks);
+          } catch (error) {
+            console.error('Error adding task:', error);
+          }
+        };
+
+        addTask(newTask);
     }
     function handleDeleteTask(id: number) {
-        const newTaskList = {
-            tasks: taskList.tasks.filter(task => task.id !== id)
-        }
-        setTaskList(newTaskList)
+        // delete task from tasklist
+        const deleteTask = async (id: number) => {
+          try {
+            await axios.delete(`${baseURL}${id}/`);
+            const newTasks = tasks ? tasks.filter(task => task.id !== id) : [];
+            setTasks(newTasks);
+          } catch (error) {
+            console.error('Error deleting task:', error);
+          }
+        };
+
+        deleteTask(id);
     }
     function handleTaskCompletionChange(id: number) {
         //Should I seperate complete state from taskList?
         //What would be the overhead?
-        const newTaskList = {
-            tasks: taskList.tasks.map(task => {
-                if (task.id === id) {
-                    return {...task, isComplete: !task.isComplete}
-                }
-                return task
-            })
-        }
-        setTaskList(newTaskList)
+        const updateTaskCompletion = async (id: number, completed: boolean) => {
+          try {
+            await axios.patch(`${baseURL}${id}/`, { completed });
+          } catch (error) {
+            console.error('Error updating task completion:', error);
+          }
+        };
+
+        // update tasks
+        const newTasks = tasks?.map(task => {
+          if (task.id === id) {
+            updateTaskCompletion(id, !task.completed);
+            return {...task, completed: !task.completed}
+          }
+          return task
+        }) 
+        
+        setTasks(newTasks)
     }
     
-    // function deleteTask(id: number) {
-    //     let newTaskList = taskList.tasks.filter(task => task.id !== id) //It does not mutate the array, it creates a new array
-    //     setTaskList({tasks: newTaskList})    
-    //     }
-    
-    // function getfilteredTaskList(taskList: TaskList) {
-    //     const filteredTaskList = {
-    //         tasks: taskList.tasks.filter(task => task.text.includes(filterText))
-    //     }
-    //     return filteredTaskList
-    // }
-
     return (
         <div>
         <SearchBar filterText={filterText} onfilterChange={setFilterText}/>
